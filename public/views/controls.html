@@ -1,0 +1,70 @@
+<table class="table table-bordered">
+    <colgroup>
+        <col width="41"/>
+        <col width="41"/>
+        <col width="41"/>
+        <col width="41"/>
+        <col width="relative_length"/>
+        <col width="135"/>
+    </colgroup>
+    <tr>
+        <td>
+            <button class="btn btn-default btn-sm"
+                    data-ng-click="prev()">
+                <span class="glyphicon glyphicon-backward"></span>
+            </button>
+        </td>
+        <td>
+            <button class="btn btn-default btn-sm"
+                    data-ng-click="toggle()">
+                                <span class="glyphicon glyphicon-play"
+                                      data-ng-class="{'glyphicon-pause':!paused}"></span>
+            </button>
+        </td>
+        <td>
+            <button class="btn btn-default btn-sm"
+                    data-ng-click="replay()">
+                <span class="glyphicon glyphicon-stop"></span>
+            </button>
+        </td>
+        <td>
+            <button class="btn btn-default"
+                    data-ng-click="next()">
+                <span class="glyphicon glyphicon-forward"></span>
+            </button>
+        </td>
+        <td>
+            <div class="audio-info">
+                {{currentTime | time}} / {{duration | time}}
+            </div>
+            <div class="progress"
+                 data-ng-click="setCurrentTime($event)">
+                <div class="progress-bar"
+                     role="progressbar"
+                     aria-valuenow="{{currentTime/duration*100}}%" aria-valuemin="0"
+                     aria-valuemax="100" data-ng-style="{width: currentTime/duration*100+'%'}">
+                    <span class="sr-only">60% Complete</span>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="btn-group" data-toggle="button-radio">
+                <button type="button" class="btn btn-default"
+                        data-ng-class="{active: playlist.mode=='LOOP'}"
+                        data-ng-click="playlist.mode = 'LOOP'">
+                    <span class="glyphicon glyphicon-retweet"></span>
+                </button>
+                <button type="button" class="btn btn-default"
+                        data-ng-class="{active: playlist.mode=='REPEAT'}"
+                        data-ng-click="playlist.mode = 'REPEAT'">
+                    <span class="glyphicon glyphicon-repeat"></span>
+                </button>
+                <button type="button" class="btn btn-default"
+                        data-ng-class="{active: playlist.mode=='RANDOM'}"
+                        data-ng-click="playlist.mode = 'RANDOM'">
+                    <span class="glyphicon glyphicon-random"></span>
+                </button>
+            </div>
+        </td>
+    </tr>
+</table>

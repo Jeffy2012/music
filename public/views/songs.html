@@ -1,0 +1,25 @@
+<div class="list-group" id="songs">
+    <a class="list-group-item"
+       data-ng-repeat="song in songs"
+       data-ng-click="addToPlaylist(song)">
+        {{song.filename}}
+        <span class="badge"
+              title="已选"
+              data-ng-if="playlist.hashes.indexOf(song.hash) != -1">!</span>
+    </a>
+    <a class="list-group-item more active"
+       data-ng-if="currentPage<totalPage"
+       data-ng-click="more()">
+        更多
+    </a>
+    <a class="list-group-item">
+        <button class="btn btn-default btn-sm"
+                data-ng-click="prev()"
+                data-ng-disabled="currentPage==1"> Prev
+        </button>
+        <button class="btn btn-default pull-right btn-sm"
+                data-ng-click="next()"
+                data-ng-disabled="currentPage>=totalPage"> Next
+        </button>
+    </a>
+</div>

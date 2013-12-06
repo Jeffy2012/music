@@ -1,0 +1,109 @@
+::-webkit-scrollbar-track-piece {
+  background-color: #fff;
+  -webkit-border-radius: 0;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  height: 50px;
+  background-color: #999;
+  -webkit-border-radius: 4px;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  border: 2px solid #fff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  height: 50px;
+  background-color: #9f9f9f;
+  -webkit-border-radius: 4px;
+}
+
+#playlist {
+  height: 425px;
+  tr {
+    height: 41px;
+    &:hover .btn {
+      display: inline-block;
+    }
+    .btn {
+      display: none;
+    }
+    td {
+      padding: 0 8px;
+      line-height: 41px;
+    }
+  }
+}
+
+#lrc-container {
+  height: 425px;
+  position: relative;
+  overflow: hidden;
+}
+
+#lrc {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  p {
+    text-align: center;
+  }
+}
+
+#controls, #entrance {
+  margin: 10px 0;
+  table {
+    margin-bottom: 10px;
+  }
+}
+
+#entrance {
+  input {
+    width: 150px;
+  }
+}
+
+.red {
+  color: red;
+}
+
+#controls .progress {
+  margin-bottom: 0;
+  height: 10px;
+  cursor: pointer;
+}
+
+.more {
+  text-align: center;
+  cursor: pointer;
+}
+
+.list-group a {
+  cursor: pointer;
+}
+
+#songs, #singers, #playlist {
+  max-height: 600px;
+  overflow: auto;
+  table {
+    margin-bottom: 0;
+    tr {
+      cursor: pointer;
+    }
+  }
+}
+
+#visualization {
+  position: relative;
+  .btn-group {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}

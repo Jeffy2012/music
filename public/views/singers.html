@@ -1,0 +1,22 @@
+<div class="list-group" id="singers">
+    <a class="list-group-item"
+       data-ng-href="/#/songs?singerID={{item.singer}}"
+       data-ng-repeat="item in singers">
+        {{item.singer}}
+    </a>
+    <a class="list-group-item more active"
+       data-ng-if="!disabled"
+       data-ng-click="more()">
+        更多
+    </a>
+    <a class="list-group-item">
+        <button class="btn btn-default"
+                data-ng-click="prev()"
+                data-ng-disabled="currentPage==1"> Prev
+        </button>
+        <button class="btn btn-default pull-right"
+                data-ng-click="next()"
+                data-ng-disabled="disabled"> Next
+        </button>
+    </a>
+</div>
