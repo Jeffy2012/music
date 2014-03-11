@@ -5,7 +5,7 @@
         <col width="41"/>
         <col width="41"/>
         <col width="relative_length"/>
-        <col width="135"/>
+        <col width="118"/>
     </colgroup>
     <tr>
         <td>
@@ -28,7 +28,7 @@
             </button>
         </td>
         <td>
-            <button class="btn btn-default"
+            <button class="btn btn-default btn-sm"
                     data-ng-click="next()">
                 <span class="glyphicon glyphicon-forward"></span>
             </button>
@@ -49,17 +49,17 @@
         </td>
         <td>
             <div class="btn-group" data-toggle="button-radio">
-                <button type="button" class="btn btn-default"
+                <button type="button" class="btn btn-default btn-sm"
                         data-ng-class="{active: playlist.mode=='LOOP'}"
                         data-ng-click="playlist.mode = 'LOOP'">
                     <span class="glyphicon glyphicon-retweet"></span>
                 </button>
-                <button type="button" class="btn btn-default"
+                <button type="button" class="btn btn-default btn-sm"
                         data-ng-class="{active: playlist.mode=='REPEAT'}"
                         data-ng-click="playlist.mode = 'REPEAT'">
                     <span class="glyphicon glyphicon-repeat"></span>
                 </button>
-                <button type="button" class="btn btn-default"
+                <button type="button" class="btn btn-default btn-sm"
                         data-ng-class="{active: playlist.mode=='RANDOM'}"
                         data-ng-click="playlist.mode = 'RANDOM'">
                     <span class="glyphicon glyphicon-random"></span>

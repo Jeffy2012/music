@@ -14,6 +14,7 @@ var app = express();
 app.set('port', process.env.PORT || 3000);
 app.use(function (req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "*");
+    res.cookie('name', 'tobi');
     next();
 });
 app.set('views', path.join(__dirname, 'views'));
@@ -27,7 +28,13 @@ app.use(express.cookieParser('your secret here'));
 app.use(express.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(function (req, res, next) {
+    if (req.url != "/") {
+        res.redirect("/#" + req.url);
+    } else {
+        next();
+    }
+});
 // development only
 if ('development' == app.get('env')) {
     app.use(express.errorHandler());

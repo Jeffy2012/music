@@ -1,5 +1,4 @@
 'use strict';
-//var server = "http://192.168.6.13:8000";
 var server = "";
 app.controller("singerCategoryCtrl", ["$scope", function ($scope) {
     $scope.categories = [
@@ -119,7 +118,7 @@ app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist"
         function query(page) {
             var deferred = $q.defer();
             var url;
-            if (cid && type) {
+            if (cid) {
                 url = "/ranking";
             } else if (keyword) {
                 url = "/search";
@@ -133,7 +132,7 @@ app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist"
                         page: page,
                         keyword: keyword,
                         cid: cid,
-                        type: type
+                        type: cid
                     },
                     cache: true
                 })
@@ -245,9 +244,9 @@ app.controller("appCtrl", ["$scope", "playlist", "LRC", "$timeout",
                 ctx.beginPath();
                 for (var i = 0; i < WIDTH; i++) {
                     if (i == 0) {
-                        ctx.moveTo(i, HEIGHT-timeDomain[Math.floor(i * rate)] * (HEIGHT / 255));
+                        ctx.moveTo(i, HEIGHT - timeDomain[Math.floor(i * rate)] * (HEIGHT / 255));
                     } else {
-                        ctx.lineTo(i, HEIGHT-timeDomain[Math.floor(i * rate)] * (HEIGHT / 255));
+                        ctx.lineTo(i, HEIGHT - timeDomain[Math.floor(i * rate)] * (HEIGHT / 255));
                     }
                     if (typeof window.heightest == 'undefined') {
                         window.heightest = timeDomain[Math.floor(i * rate)]
