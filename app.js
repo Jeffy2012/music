@@ -7,14 +7,13 @@ var http = require('http');
 var path = require('path');
 var fs = require("fs");
 var music = require('./routes/music');
-
+var weixin = require("./routes/weixin");
 var app = express();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.use(function (req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.cookie('name', 'tobi');
     next();
 });
 app.set('views', path.join(__dirname, 'views'));
@@ -50,6 +49,8 @@ app.get("/m4a", music.m4a);
 app.get("/lrc", music.lrc);
 app.get("/ranking-list", music.rankingList);
 app.get("/ranking", music.ranking);
+app.get("/weixin", weixin.get);
+app.post("/weixin", weixin.post);
 http.createServer(app).listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
