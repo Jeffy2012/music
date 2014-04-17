@@ -1,90 +1,188 @@
-var url = require('url'),
-    _ = require("underscore"),
-    configs = {
-        //http://m.kugou.com/app/i/krc.php?cmd=100&keyword=%25E5%2591%25A8%25E6%259D%25B0%25E4%25BC%25A6%2520-%2520%25E8%25AF%25B4%25E5%25A5%25BD%25E7%259A%2584%25E5%25B9%25B8%25E7%25A6%258F%25E5%2591%25A2&timelength=256000&d=1386058477417
-        lrc: {
-            protocol: "http:",
-            host: "m.kugou.com",
-            pathname: "/app/i/krc.php",
-            query: {
-                cmd: 100,
-                keyword: "",
-                timelength: 256000,
-                d: 1386140570176
-            }
-        },
-        //http://mobilecdn.kugou.com/new/app/i/yueku.php?cmd=100&cid=21&type=21&page=1&pagesize=10&outputtype=jsonp&callback=returnLists
-        rankingList: {
-            protocol: "http:",
-            host: "mobilecdn.kugou.com",
-            pathname: "/new/app/i/yueku.php",
-            query: {
-                cmd: 100,
-                cid: 21,
-                type: 21,
-                pagesize: 10,
-                page: 1
-            }
-        },
-        //http://mobilecdn.kugou.com/new/app/i/yueku.php?cmd=101&cid=6187&type=6187&page=1&pagesize=20&outputtype=jsonp&callback=returnSongs
-        ranking: {
-            protocol: "http:",
-            host: "mobilecdn.kugou.com",
-            pathname: "/new/app/i/yueku.php",
-            query: {
-                cmd: 101,
-                cid: 28,
-                type: 28,
-                page: 1,
-                pagesize: 20
-            }
-        },
-        //http://m.kugou.com/app/i/singer_new.php?classID=1&page=1
-        singers: {
-            protocol: "http:",
-            host: "m.kugou.com",
-            pathname: "/app/i/singer_new.php",
-            query: {
-                classID: 1,
-                page: 1
-            }
-        },
-        //http://m.kugou.com/app/i/singerSong_new.php?singerID=%25E5%2591%25A8%25E6%259D%25B0%25E4%25BC%25A6&page=1
-        songs: {
-            protocol: "http:",
-            host: "m.kugou.com",
-            pathname: "/app/i/singerSong_new.php",
-            query: {
-                singerID: "",
-                page: 1
-            }
-        },
-        //http://m.kugou.com/app/i/getSongInfo.php?hash=dc8b5ecec96436d5c5d8c38240720e81&cmd=playInfo
-        music: {
-            protocol: "http:",
-            host: "m.kugou.com",
-            pathname: "/app/i/getSongInfo.php",
-            query: {
-                cmd: "playInfo",
-                hash: "dc8b5ecec96436d5c5d8c38240720e81"
-            }
-        },
-        //http://mobilecdn.kugou.com/new/app/i/search.php?cmd=300&keyword=test&page=1&pagesize=20&outputtype=jsonp&callback=returnSearchData
-        search: {
-            protocol: "http:",
-            host: "mobilecdn.kugou.com",
-            pathname: "/new/app/i/search.php",
-            query: {
-                cmd: 300,
-                pagesize: 20,
-                keyword: "JEFFY",
-                page: 1
-            }
-        }
-    };
-module.exports = function (key, query) {
-    var urlData = configs[key];
-    urlData.query = urlData.query || {};
-    _.extend(urlData.query, query);
-    return url.format(urlData);
+var request = require('request'),
+	config = require("./config"),
+	db = require('../db'),
+	Song = db.Song,
+	Search = db.Search,
+	Music = db.Music,
+	Singer = db.Singer,
+	caches = require('../caches'),
+	searchCaches = caches.searchCaches,
+	singerCaches = caches.singerCaches,
+	songCache = caches.songCaches,
+	rankingCaches = caches.rankingCaches,
+	lrcCaches = caches.lrcCaches,
+	rankingListCaches = caches.rankingListCaches;
+
+function saveMusic(data) {
+	data.forEach(function (music) {
+		Music.findOneAndUpdate({hash: music.hash}, music, {upsert: true}, function (err, result) {
+			if (err) {
+				console.log(err);
+			}
+		});
+	});
+}
+
+exports.ranking = function (req, res) {
+	var key = JSON.stringify(req.query);
+	rankingCaches[key] = rankingCaches[key] || {};
+	var rankingData = rankingCaches[key];
+	if (rankingData.response) {
+		res.json(rankingData.response);
+		rankingData.date = new Date().getTime();
+	} else {
+		request(config("ranking", req.query), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var data = JSON.parse(body.trim());
+				res.end(data);
+				saveMusic(data.data);
+				rankingData.response = data;
+				rankingData.date = new Date().getTime();
+			}
+		});
+	}
+};
+
+exports.rankingList = function (req, res) {
+	var key = JSON.stringify(req.query);
+	rankingListCaches[key] = rankingListCaches[key] || {};
+	var rankingListData = rankingListCaches[key];
+	if (rankingListData.response) {
+		res.json(rankingListData.response);
+		rankingListData.date = new Date().getTime();
+	} else {
+		request(config("rankingList", req.query), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var data = JSON.parse(body.trim());
+				res.json(data);
+				rankingListData.response = data;
+				rankingListData.date = new Date().getTime();
+			}
+		});
+	}
+};
+
+exports.singers = function (req, res) {
+	var key = JSON.stringify(req.query);
+	singerCaches[key] = singerCaches[key] || {};
+	var singerData = singerCaches[key];
+	if (singerData.response) {
+		res.json(singerData.response);
+		singerData.date = new Date().getTime();
+	} else {
+		request(config("singers", req.query), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var data = JSON.parse(body.trim());
+				res.json(data);
+				data.data.forEach(function (singer) {
+					Singer.findOneAndUpdate({singer: singer.singer}, singer, {upsert: true}, function (err, result) {
+						if (err) {
+							console.log(err);
+						}
+					});
+				});
+				singerData.response = data;
+				singerData.date = new Date().getTime();
+			}
+		});
+	}
+};
+
+exports.search = function (req, res) {
+	var keyword = req.query.keyword;
+	keyword = keyword.trim().replace(/\s{2,}/ig, ' ');
+	req.query.keyword = keyword;
+	var key = JSON.stringify(req.query);
+	searchCaches[key] = searchCaches[key] || {};
+	var searchData = searchCaches[key];
+	if (searchData.response) {
+		res.json(searchData.response);
+		searchData.date = new Date().getTime();
+	} else {
+		request(config("search", req.query), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var data = JSON.parse(body.trim());
+				res.json(data);
+				saveMusic(data.data);
+				searchData.response = data;
+				searchData.date = new Date().getTime();
+			}
+		});
+	}
+	Search.findOneAndUpdate({keyword: keyword}, {$inc: {times: 1}}, function (err, result) {
+		if (!result) {
+			var search = new Search({
+				keyword: keyword,
+				times: 1
+			});
+			search.save(function (err, result) {
+				if (err) {
+					console.log(err);
+				}
+			});
+		}
+	});
+};
+
+exports.songs = function (req, res) {
+	var key = JSON.stringify(req.query);
+	songCache[key] = songCache[key] || {};
+	var songData = songCache[key];
+	if (songData.response) {
+		res.json(songData.response);
+		songData.date = new Date().getTime();
+	} else {
+		request(config("songs", req.query), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var data = JSON.parse(body.trim());
+				res.json(data);
+				saveMusic(data.data);
+				songData.response = data;
+				songData.date = new Date().getTime();
+			}
+		});
+	}
+};
+
+
+exports.lrc = function (req, res) {
+	var key = JSON.stringify(req.query);
+	lrcCaches[key] = lrcCaches[key] || {};
+	var lrcData = lrcCaches[key];
+	if (lrcData.response) {
+		res.end(lrcData.response);
+		lrcData.date = new Date().getTime();
+	} else {
+		request(config("lrc", req.query), function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var data = body.trim();
+				res.end(data);
+				lrcData.response = data;
+				lrcData.date = new Date().getTime();
+			}
+		});
+	}
+
+};
+
+exports.music = function (req, res) {
+	var hash = req.query.hash;
+	Song.findOne({hash: hash}, function (err, result) {
+		if (result) {
+			res.json(result);
+		} else {
+			request(config("music", req.query), function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					var data = JSON.parse(body.trim());
+					res.json(data);
+					var song = new Song(data);
+					song.save(function (err) {
+						if (err) {
+							console.log(err);
+						}
+					});
+				}
+			});
+		}
+	});
 };
