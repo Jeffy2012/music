@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= fileName %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style>
+        audio {
+            display: none;
+        }
+
+        button {
+            height: 50px;
+            width: 200px;
+            display: block;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+<button id="play">播放</button>
+<audio src="<%= url %>" controls="controls" preload="none" loop id="audio"></audio>
+<script>
+    document.querySelector('#play').addEventListener("click", function (e) {
+        var audio = document.querySelector('#audio');
+        if (audio.paused) {
+            audio.play();
+            this.innerHTML = '暂停';
+        } else {
+            this.innerHTML = '播放';
+            audio.pause();
+        }
+    }, false);
+</script>
+</body>
+</html>

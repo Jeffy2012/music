@@ -3,7 +3,8 @@ exports.singerCaches = {};
 exports.songCaches = {};
 exports.rankingCaches = {};
 exports.lrcCaches = {};
-exports.rankingListCaches = {};
+exports.listCaches = {};
+exports.iconCaches = {};
 exports.clean = function (key) {
 
 };

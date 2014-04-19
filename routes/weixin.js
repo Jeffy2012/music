@@ -1,16 +1,12 @@
-var parseString = require('xml2js').parseString;
-var Q = require("q");
-var service = require('./service'),
-	querySong = service.querySong,
-	fetchSong = service.fetchSong;
-var config = require("./service/config");
-var request = require("request");
-var caches = require('./caches'),
+var parseString = require('xml2js').parseString,
+	service = require('./service'),
+	caches = require('./caches'),
 	searchCaches = caches.searchCaches,
-	db = require('./db'),
-	Search = db.Search,
-	Music = db.Music,
-	Song = db.Song;
+	Q = require('q'),
+	getSong = service.getSong,
+	fetchSearch = service.fetchSearch,
+	getIcon = service.getIcon,
+	_ = require('underscore');
 
 exports.get = function (req, res) {
 	res.end(req.query.echostr);
@@ -22,49 +18,62 @@ exports.post = function (req, res) {
 		} else {
 			res.end('');
 		}
-
 	});
 };
 
 function textMsg(msg, res) {
 	var keyword = msg.Content;
 	keyword = keyword.trim().replace(/\s{2,}/ig, ' ');
-	var key = JSON.stringify({keyword: keyword});
+	var key = JSON.stringify({keyword: keyword}),
+		searchData, result;
 	searchCaches[key] = searchCaches[key] || {};
-	var searchData = searchCaches[key];
-	if (searchData.response) {
-		findSong(searchData.response.data[0].hash, msg).done(function (result) {
-			res.send(result);
-		});
-		searchData.date = new Date().getTime();
+	searchData = searchCaches[key];
+	result = searchData.response;
+	if (result) {
+		dealData(res, msg, result);
 	} else {
-		request(config("search", {keyword: keyword}), function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var data = JSON.parse(body.trim());
-				findSong(data.data[0].hash, msg).done(function (result) {
-					res.send(result);
-				});
-				saveMusic(data.data);
-				searchData.response = data;
-				searchData.date = new Date().getTime();
-			}
+		fetchSearch({keyword: keyword}).done(function (result) {
+			dealData(res, msg, result);
 		});
 	}
-	Search.findOneAndUpdate({keyword: keyword}, {$inc: {times: 1}}, function (err, result) {
-		if (!result) {
-			var search = new Search({
-				keyword: keyword,
-				times: 1
+}
+function dealData(res, msg, result) {
+	var keyword = msg.Content,
+		first = result.data.info[0];
+	if (/.*-.*/.test(keyword)) {
+		getSong(first.hash).done(function (result) {
+			res.render('weixin/music', {
+				toUser: msg.FromUserName,
+				fromUser: msg.ToUserName,
+				timestamp: Math.floor(Date.now() / 1000),
+				title: first.filename,
+				musicUrl: result.url,
+				HQMusicUrl: result.url
 			});
-			search.save(function (err, result) {
-				if (err) {
-					console.log(err);
-				}
+		});
+	} else {
+		if (/(.*)-.*/.test(first.filename)) {
+			getIcon({singerName: RegExp.$1.split("、")[0]}).done(function (icon) {
+				first.icon = icon.url.replace('softhead/', 'softhead/200/');
+				res.render('weixin/list', {
+					toUser: msg.FromUserName,
+					fromUser: msg.ToUserName,
+					timestamp: Math.floor(Date.now() / 1000),
+					list: result.data.info.slice(0, 8),
+					keyword: msg.Content
+				});
+			});
+		} else {
+			res.render('weixin/list', {
+				toUser: msg.FromUserName,
+				fromUser: msg.ToUserName,
+				timestamp: Math.floor(Date.now() / 1000),
+				list: result.data.info.slice(0, 8),
+				keyword: msg.Content
 			});
 		}
-	});
+	}
 }
-
 function parseReq(req) {
 	var deferred = Q.defer();
 	var xml = '';
@@ -80,59 +89,4 @@ function parseReq(req) {
 		});
 	});
 	return deferred.promise;
-}
-
-function findSong(hash, msg) {
-	var deferred = Q.defer();
-	Song.findOne({hash: hash}, function (err, result) {
-		if (result) {
-			deferred.resolve(CreateMusicMsg(msg, result));
-		} else {
-			request(config("music", {hash: hash}), function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					var data = JSON.parse(body.trim());
-					deferred.resolve(CreateMusicMsg(msg, data));
-					var song = new Song(data);
-					song.save(function (err) {
-						if (err) {
-							console.log(err);
-						}
-					});
-				}
-			});
-		}
-	});
-	return deferred.promise;
-}
-
-function CreateMusicMsg(msg, result) {
-	var time = Math.round(new Date().getTime() / 1000);
-
-	var funcFlag = msg.funcFlag ? msg.funcFlag : '';
-
-	var output = "" +
-		"<xml>" +
-		"<ToUserName><![CDATA[" + msg.FromUserName + "]]></ToUserName>" +
-		"<FromUserName><![CDATA[" + msg.ToUserName + "]]></FromUserName>" +
-		"<CreateTime>" + time + "</CreateTime>" +
-		"<MsgType><![CDATA[music]]></MsgType>" +
-		"<Music>" +
-		"<Title><![CDATA[" + result.fileName + "]]></Title>" +
-		"<Description><![CDATA[" + result.fileName + "DESCRIPTION]]></Description>" +
-		"<MusicUrl><![CDATA[" + result.url + "]]></MusicUrl>" +
-		"<HQMusicUrl><![CDATA[" + result.url + "]]></HQMusicUrl>" +
-		"</Music>" +
-		"<FuncFlag>" + funcFlag + "</FuncFlag>" +
-		"</xml>";
-
-	return output;
-}
-function saveMusic(data) {
-	data.forEach(function (music) {
-		Music.findOneAndUpdate({hash: music.hash}, music, {upsert: true}, function (err, result) {
-			if (err) {
-				console.log(err);
-			}
-		});
-	});
 }

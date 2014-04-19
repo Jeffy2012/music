@@ -50,8 +50,12 @@ var musicSchema = Schema({
 	isnew: Number
 });
 var singerSchema = Schema({
+	singerid: Number,
 	singer: String,
-	src: String
+	songcount: Number,
+	albumcount: Number,
+	mvcount: Number,
+	imgurl: String
 });
 
 exports.searchSchema = searchSchema;

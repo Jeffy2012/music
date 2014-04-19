@@ -1,0 +1,24 @@
+<xml>
+    <ToUserName><![CDATA[<%= toUser %>]]></ToUserName>
+    <FromUserName><![CDATA[<%= fromUser %>]]></FromUserName>
+    <CreateTime><%= timestamp %></CreateTime>
+    <MsgType><![CDATA[news]]></MsgType>
+    <ArticleCount><%= list.length %></ArticleCount>
+    <Articles>
+        <% list.forEach(function(song, index){ %>
+        <item>
+            <Title><![CDATA[<%= song.filename %>]]></Title>
+            <Description><![CDATA[]]></Description>
+            <% if(index == 0){ %>
+            <PicUrl><![CDATA[<%= song.icon %>]]></PicUrl>
+            <% } %>
+            <Url><![CDATA[http://www.blue.wha.la/song?hash=<%= song.hash %>]]></Url>
+        </item>
+        <% }) %>
+        <item>
+            <Title><![CDATA[更多歌曲]]></Title>
+            <Description><![CDATA[]]></Description>
+            <Url><![CDATA[http://www.blue.wha.la/search?keyword=<%= keyword %>]]></Url>
+        </item>
+    </Articles>
+</xml>

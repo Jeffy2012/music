@@ -101,7 +101,8 @@ app.factory("LRC", ["$http", "$q", function ($http, $q) {
 				.get(server + "/lrc", {
 					params: {
 						keyword: encodeURIComponent(song.filename),
-						timelength: parseInt(song.timelength) * 1000
+						timelength: parseInt(song.data.timeLength) * 1000,
+						hash: song.hash
 					},
 					cache: true
 				})

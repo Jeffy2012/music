@@ -6,7 +6,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var fs = require("fs");
-var music = require('./routes/service');
+var site = require('./routes/site');
 var weixin = require("./routes/weixin");
 var app = express();
 
@@ -41,13 +41,13 @@ if ('development' == app.get('env')) {
 app.get("/", function (req, res) {
 	fs.createReadStream("./public/index.html").pipe(res);
 });
-app.get("/search", music.search);
-app.get("/singers", music.singers);
-app.get("/songs", music.songs);
-app.get("/music", music.music);
-app.get("/lrc", music.lrc);
-app.get("/ranking-list", music.rankingList);
-app.get("/ranking", music.ranking);
+app.get("/search", site.search);
+app.get("/singers", site.singers);
+app.get("/tunes", site.tunes);
+app.get("/song", site.song);
+app.get("/lrc", site.lrc);
+app.get("/list", site.list);
+app.get("/ranking", site.ranking);
 app.get("/weixin", weixin.get);
 app.post("/weixin", weixin.post);
 http.createServer(app).listen(app.get('port'), function () {

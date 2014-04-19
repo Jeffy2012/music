@@ -14,7 +14,7 @@ var url = require('url'),
 			}
 		},
 		//http://mobilecdn.kugou.com/new/app/i/yueku.php?cmd=100&cid=21&type=21&page=1&pagesize=10&outputtype=jsonp&callback=returnLists
-		rankingList: {
+		list: {
 			protocol: "http:",
 			host: "mobilecdn.kugou.com",
 			pathname: "/new/app/i/yueku.php",
@@ -50,7 +50,7 @@ var url = require('url'),
 			}
 		},
 		//http://m.kugou.com/app/i/singerSong_new.php?singerID=%25E5%2591%25A8%25E6%259D%25B0%25E4%25BC%25A6&page=1
-		songs: {
+		tunes: {
 			protocol: "http:",
 			host: "m.kugou.com",
 			pathname: "/app/i/singerSong_new.php",

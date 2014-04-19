@@ -1,6 +1,6 @@
 'use strict';
 var server = "";
-app.controller("singerCategoryCtrl", ["$scope", function ($scope) {
+app.controller("categoryCtrl", ["$scope", function ($scope) {
 	$scope.categories = [
 		"华语男歌手", "华语女歌手", "华语组合",
 		"日韩男歌手", "日韩女歌手", "日韩组合",
@@ -11,7 +11,7 @@ app.controller("singerCategoryCtrl", ["$scope", function ($scope) {
 
 app.controller("singersCtrl", ["$scope", "$http", "$routeParams", "$q",
 	function ($scope, $http, $routerParams, $q) {
-		var classID = $routerParams.classID;
+		var classID = $routerParams.ClassID;
 		$scope.currentPage = 1;
 		$scope.disabled = false;
 		function query(page) {
@@ -19,7 +19,7 @@ app.controller("singersCtrl", ["$scope", "$http", "$routeParams", "$q",
 			$http
 				.get(server + "/singers", {
 					params: {
-						classID: classID,
+						classid: classID,
 						page: page
 					},
 					cache: true
@@ -59,14 +59,14 @@ app.controller("singersCtrl", ["$scope", "$http", "$routeParams", "$q",
 		};
 	}]);
 
-app.controller("rankingListCtrl", ["$scope", "$http", "$q",
+app.controller("listCtrl", ["$scope", "$http", "$q",
 	function ($scope, $http, $q) {
 		$scope.currentPage = 1;
 		$scope.disabled = false;
 		function query(page) {
 			var deferred = $q.defer();
 			$http
-				.get(server + "/ranking-list", {
+				.get(server + "/list", {
 					params: {
 						page: page
 					},
@@ -107,7 +107,7 @@ app.controller("rankingListCtrl", ["$scope", "$http", "$q",
 			});
 		};
 	}]);
-app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist",
+app.controller("tunesCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist",
 	function ($scope, $http, $routerParams, $q, playlist) {
 		var singerID = $routerParams.singerID;
 		var keyword = $routerParams.keyword;
@@ -123,12 +123,12 @@ app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist"
 			} else if (keyword) {
 				url = "/search";
 			} else if (singerID) {
-				url = "/songs";
+				url = "/tunes";
 			}
 			$http
 				.get(server + url, {
 					params: {
-						singerID: singerID,
+						singerid: singerID,
 						page: page,
 						keyword: keyword,
 						cid: cid,
@@ -144,10 +144,10 @@ app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist"
 			return deferred.promise;
 		}
 
-		function getMusicData(hash) {
+		function getSongData(hash) {
 			var deferred = $q.defer();
 			$http
-				.get(server + "/music", {
+				.get(server + "/song", {
 					params: {
 						hash: hash
 					},
@@ -161,23 +161,20 @@ app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist"
 			return deferred.promise;
 		}
 
-		query($scope.currentPage).then(function (data) {
-			$scope.songs = data.data;
-			$scope.totalPage = Math.ceil(data.recordcount / 20);
-		});
-		$scope.next = function () {
-			var page = $scope.currentPage + 1;
+		function action(page) {
 			query(page).then(function (data) {
-				$scope.songs = data.data;
-				$scope.currentPage++;
+				$scope.songs = data.data.info || data.data;
+				$scope.currentPage = page;
+				$scope.totalPage = Math.ceil((data.data.total || data.recordcount) / 20);
 			});
+		}
+
+		action($scope.currentPage);
+		$scope.next = function () {
+			action($scope.currentPage + 1);
 		};
 		$scope.prev = function () {
-			var page = $scope.currentPage - 1;
-			query(page).then(function (data) {
-				$scope.songs = data.data;
-				$scope.currentPage--;
-			});
+			action($scope.currentPage - 1);
 		};
 		$scope.more = function () {
 			var page = $scope.currentPage + 1;
@@ -187,7 +184,7 @@ app.controller("songsCtrl", ["$scope", "$http", "$routeParams", "$q", "playlist"
 			});
 		};
 		$scope.addToPlaylist = function (song) {
-			getMusicData(song.hash).then(function (data) {
+			getSongData(song.hash).then(function (data) {
 				song.data = data;
 				delete song.$$hashKey;
 				song.timestamp = new Date().getTime();
